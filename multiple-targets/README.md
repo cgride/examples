@@ -1,10 +1,10 @@
 # Cgride Multiple Targets Example
 
-This example shows a project with two executable targets.
+This example shows a Cgride project with two executable targets.
 
 ```text
 multiple-targets/
-├── cgride.config
+├── cgride.cpp
 ├── server/
 │   └── src/
 │       └── main.cpp
@@ -13,49 +13,52 @@ multiple-targets/
         └── main.cpp
 ```
 
-## Project shape
+## Project description
 
-The config describes two executable targets:
+The project is described with C++ in `cgride.cpp`.
 
-```text
-[project]
-name = multiple-targets
+```cpp
+#include <cgride/project.hpp>
 
-[target.server]
-kind = executable
-sources = server/src/main.cpp
+void cgride_configure(cgride::project::Project &project)
+{
+  auto &server = project.executable("server");
 
-[target.worker]
-kind = executable
-sources = worker/src/main.cpp
+  server.sources("server/src/main.cpp");
+
+  auto &worker = project.executable("worker");
+
+  worker.sources("worker/src/main.cpp");
+}
 ```
 
-## Build with Vix
+## Build
 
-Build the server executable:
+Build the default target:
 
 ```bash
-vix build server/src/main.cpp --out server
+cgride build
 ```
 
-Build the worker executable:
+Build a specific target:
 
 ```bash
-vix build worker/src/main.cpp --out worker
+cgride build --target server
+cgride build --target worker
 ```
 
-## Run with Vix
+## Run
 
-Run the server:
+Run the server target:
 
 ```bash
-vix run server/src/main.cpp
+cgride run --target server
 ```
 
-Run the worker:
+Run the worker target:
 
 ```bash
-vix run worker/src/main.cpp
+cgride run --target worker
 ```
 
 ## Expected output
@@ -72,15 +75,11 @@ Worker:
 Hello from the Cgride worker target
 ```
 
-## Notes
+## What this example shows
 
-This example keeps the future Cgride multi-target project shape while staying buildable today with Vix single-file mode.
+This example shows:
 
-Later, when Cgride target selection is fully connected, the intended commands will be:
-
-```bash
-cgride build --target server
-cgride build --target worker
-cgride run --target server
-cgride run --target worker
-```
+- multiple executable targets;
+- target selection with `--target`;
+- separate source folders;
+- a project described with `cgride.cpp`.
