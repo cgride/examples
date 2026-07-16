@@ -1,58 +1,60 @@
 # Cgride Embedded API Example
 
-This example shows how a C++ program can use Cgride as a library.
+This example shows how another C++ program can use Cgride directly as a library.
 
-Unlike the other examples, this one does not use `cgride.config`.
+It does not describe a user project with `cgride.cpp`.
 
-It includes the umbrella Cgride header, creates a project in memory, discovers a toolchain, creates a build request, and calls the build engine directly.
+Instead, it shows the lower-level C++ API used behind the CLI.
 
 ```text
 embedded-api/
-├── CMakeLists.txt
-└── src/
-    └── main.cpp
+└── main.cpp
 ```
 
-## Build with Vix
+## What this example shows
+
+This example includes the public umbrella header:
+
+```cpp
+#include <cgride/cgride.hpp>
+```
+
+Then it creates a project in memory, creates targets, configures sources, discovers a toolchain, builds a request, and calls the build engine directly.
+
+## Build
 
 From this directory:
 
 ```bash
-vix build --build-target cgride_embedded_api_example -v
+cgride build main.cpp --out embedded-api
 ```
 
-## Run the built example
-
-After building, run the produced executable from the Vix build directory:
+## Run
 
 ```bash
-./build-ninja/cgride_embedded_api_example
+./embedded-api
 ```
 
-For a release build:
+## Expected output
 
-```bash
-vix build --preset release --build-target cgride_embedded_api_example -v
-./build-release/cgride_embedded_api_example
+```text
+Cgride embedded API example completed
 ```
 
-## What this example demonstrates
+## Why this example exists
 
-The example demonstrates the public embedding flow:
+The normal user-facing Cgride project format is:
 
-1. Include the full Cgride API.
-2. Create a `cgride::project::Project`.
-3. Add an executable target.
-4. Discover the local C++ toolchain.
-5. Create `cgride::engine::BuildOptions`.
-6. Create a `cgride::engine::BuildRequest`.
-7. Call `cgride::engine::BuildEngine`.
+```text
+project/
+├── cgride.cpp
+└── src/
+    └── main.cpp
+```
 
-## Why this matters
+This example is different.
 
-Cgride is not only a CLI.
-
-The engine is meant to be reusable by other tools:
+It is for tools that want to embed Cgride directly:
 
 - runtimes;
 - frameworks;
@@ -61,4 +63,4 @@ The engine is meant to be reusable by other tools:
 - developer tools;
 - higher-level build workflows.
 
-A tool can create a Cgride project model in memory and call the engine directly without exposing Cgride as a user-facing command.
+Those tools can use the Cgride C++ API directly instead of exposing Cgride configuration files to their users.

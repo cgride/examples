@@ -2,11 +2,15 @@
 
 This repository contains example projects for Cgride.
 
-The examples show how Cgride is expected to be used from the command line and from the public C++ API.
+The examples show the intended Cgride project model:
 
-Cgride itself is an embeddable native C++ build engine. The CLI is only one interface over the engine. These examples keep that distinction clear: some projects are built through `cgride build`, while others show how another C++ program can use Cgride directly as a library.
+```text
+Build C++ with C++.
+```
 
-## Examples
+A Cgride project is described with a `cgride.cpp` file. The build description is written in C++, not in a custom config format and not in CMake.
+
+## Structure
 
 ```text
 examples/
@@ -16,34 +20,55 @@ examples/
 └── embedded-api/
 ```
 
-## `hello`
+## Requirements
 
-A minimal Cgride project.
+You need the `cgride` command available in your `PATH`.
+
+Check the installed version:
+
+```bash
+cgride --version
+```
+
+## Examples
+
+### `hello`
+
+A minimal executable project.
 
 ```text
 hello/
-├── cgride.config
+├── cgride.cpp
 └── src/
     └── main.cpp
 ```
 
-This example contains one executable target.
-
-Use it to test the simplest project shape:
+Build it:
 
 ```bash
 cd hello
 cgride build
+```
+
+Run it:
+
+```bash
 cgride run
 ```
 
-## `static-library`
+Expected output:
 
-A project with a static library and an executable.
+```text
+Hello from Cgride
+```
+
+### `static-library`
+
+A project with one library target and one executable target.
 
 ```text
 static-library/
-├── cgride.config
+├── cgride.cpp
 ├── core/
 │   ├── include/
 │   │   └── core/
@@ -55,29 +80,32 @@ static-library/
         └── main.cpp
 ```
 
-This example demonstrates a target-to-target relationship:
-
-```text
-core static library
-        ↓
-app executable
-```
-
-Use it to test library creation, include directories, and linking between project targets.
+Build it:
 
 ```bash
 cd static-library
 cgride build
+```
+
+Run it:
+
+```bash
 cgride run
 ```
 
-## `multiple-targets`
+Expected output:
 
-A project with more than one executable target.
+```text
+Hello from the Cgride static library example
+```
+
+### `multiple-targets`
+
+A project with two executable targets.
 
 ```text
 multiple-targets/
-├── cgride.config
+├── cgride.cpp
 ├── server/
 │   └── src/
 │       └── main.cpp
@@ -85,8 +113,6 @@ multiple-targets/
     └── src/
         └── main.cpp
 ```
-
-This example is useful for testing target selection.
 
 Build the default target:
 
@@ -109,33 +135,40 @@ cgride run --target server
 cgride run --target worker
 ```
 
-## `embedded-api`
+Expected output for `server`:
 
-A C++ integration example.
+```text
+Hello from the Cgride server target
+```
+
+Expected output for `worker`:
+
+```text
+Hello from the Cgride worker target
+```
+
+### `embedded-api`
+
+A direct C++ API example.
 
 ```text
 embedded-api/
-├── CMakeLists.txt
-└── src/
-    └── main.cpp
+└── main.cpp
 ```
 
-This example does not use `cgride.config`.
+This example shows how another C++ program can use Cgride as a library through the public umbrella header:
 
-It shows how a C++ program can include the umbrella Cgride API, create a project in memory, discover a toolchain, create a build request, and call the build engine directly.
-
-This is the model intended for runtimes, frameworks, IDE tools, and other developer tools that want to embed Cgride instead of exposing Cgride directly to their users.
-
-Build it with CMake or with a higher-level workflow that has Cgride installed:
-
-```bash
-cd embedded-api
-vix build --build-target all -v
+```cpp
+#include <cgride/cgride.hpp>
 ```
 
-## Build all examples
+It demonstrates the lower-level embedding model behind the CLI.
 
-From this repository root:
+The normal user-facing examples are `hello`, `static-library`, and `multiple-targets`.
+
+## Build all CLI examples
+
+From the repository root:
 
 ```bash
 for dir in hello static-library multiple-targets; do
@@ -146,32 +179,63 @@ for dir in hello static-library multiple-targets; do
 done
 ```
 
-The `embedded-api` example is different because it is a C++ integration program. Build it separately:
+## Run all CLI examples
+
+From the repository root:
 
 ```bash
-cd embedded-api
-vix build
+cd hello
+cgride run
+cd ..
+
+cd static-library
+cgride run
+cd ..
+
+cd multiple-targets
+cgride run --target server
+cgride run --target worker
+cd ..
 ```
 
-## Current status
+## Project format
 
-These examples are intentionally small.
+The official user-facing Cgride project format is:
 
-They are designed to validate the public shape of Cgride before adding larger examples.
+```text
+project/
+├── cgride.cpp
+└── src/
+    └── main.cpp
+```
+
+The `cgride.cpp` file is real C++ code. It describes the project, targets, sources, include directories, links, and build settings by using the Cgride C++ API.
+
+Cgride does not use these examples to promote multiple project formats.
+
+For these examples:
+
+```text
+cgride.cpp      official user project description
+main.cpp        normal C++ source file
+cgride command  user-facing build and run interface
+```
+
+No `cgride.config` file is used.
+
+No `CMakeLists.txt` file is used for the user-facing examples.
+
+## Current examples
 
 The current examples cover:
 
-- a minimal executable;
-- a static library linked into an executable;
+- one executable target;
+- one library target linked into an executable;
 - multiple executable targets;
-- direct embedding through the public C++ API.
+- direct use of the public Cgride C++ API.
 
-Future examples may cover:
+## Notes
 
-- compiled `cgride.cpp` configuration;
-- generated build graphs;
-- custom build directories;
-- debug and release profiles;
-- incremental rebuild behavior;
-- structured diagnostics;
-- runtime integration examples.
+These examples are intentionally small.
+
+They are meant to validate the public Cgride shape before larger examples are added.

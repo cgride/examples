@@ -1,10 +1,18 @@
 # Cgride Static Library Example
 
-This example shows a project with a small static-library-style component and an executable that uses it.
+This example shows a Cgride project with two targets:
+
+```text
+core static library
+        ↓
+app executable
+```
+
+The project is described with C++ in `cgride.cpp`.
 
 ```text
 static-library/
-├── cgride.config
+├── cgride.cpp
 ├── core/
 │   ├── include/
 │   │   └── core/
@@ -16,45 +24,41 @@ static-library/
         └── main.cpp
 ```
 
-## Project shape
+## Project description
 
-The config describes two targets:
+The `core` target is a static library.
 
-```text
-[project]
-name = static-library
+The `app` target is an executable that links with `core`.
 
-[target.core]
-kind = static_library
-sources = core/src/message.cpp
-include_dirs = core/include
+```cpp
+#include <cgride/project.hpp>
 
-[target.app]
-kind = executable
-sources = app/src/main.cpp
-links = core
+void cgride_configure(cgride::project::Project &project)
+{
+  auto &core = project.static_library("core");
+
+  core.sources("core/src/message.cpp");
+  core.include_dirs("core/include");
+
+  auto &app = project.executable("app");
+
+  app.sources("app/src/main.cpp");
+  app.links(core);
+}
 ```
 
-The dependency shape is:
-
-```text
-core static library
-        ↓
-app executable
-```
-
-## Build with Vix
+## Build
 
 From this directory:
 
 ```bash
-vix build app/src/main.cpp --out static-library-app -- -Icore/include core/src/message.cpp
+cgride build
 ```
 
-## Run with Vix
+## Run
 
 ```bash
-vix run app/src/main.cpp -- -Icore/include core/src/message.cpp
+cgride run
 ```
 
 ## Expected output
@@ -63,8 +67,13 @@ vix run app/src/main.cpp -- -Icore/include core/src/message.cpp
 Hello from the Cgride static library example
 ```
 
-## Notes
+## What this example shows
 
-This example keeps a future Cgride project configuration file while remaining buildable today with Vix.
+This example shows:
 
-The `core` target is represented as a library target in `cgride.config`. For the current Vix command, `core/src/message.cpp` is passed as an additional source file and `core/include` is passed as an include directory.
+- one static library target;
+- one executable target;
+- source files in different folders;
+- public include directories;
+- linking one target with another target;
+- a project described with `cgride.cpp`.

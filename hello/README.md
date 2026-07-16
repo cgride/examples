@@ -1,41 +1,45 @@
 # Cgride Hello Example
 
-This is the minimal Cgride example.
+This is the minimal Cgride project.
 
-It contains one executable target and one source file.
+It shows the basic project shape:
 
 ```text
 hello/
-├── cgride.config
+├── cgride.cpp
 └── src/
     └── main.cpp
 ```
 
-## Project shape
+## Project description
 
-The config file describes one executable target:
+The build is described in `cgride.cpp`.
 
-```text
-[project]
-name = hello
+Cgride uses C++ as the project description language. There is no separate config file.
 
-[target.hello]
-kind = executable
-sources = src/main.cpp
+```cpp
+#include <cgride/project.hpp>
+
+void cgride_configure(cgride::project::Project &project)
+{
+  auto &app = project.executable("hello");
+
+  app.sources("src/main.cpp");
+}
 ```
 
-## Build with Vix
+## Build
 
 From this directory:
 
 ```bash
-vix build src/main.cpp --out hello
+cgride build
 ```
 
-## Run with Vix
+## Run
 
 ```bash
-vix run src/main.cpp
+cgride run
 ```
 
 ## Expected output
@@ -44,6 +48,11 @@ vix run src/main.cpp
 Hello from Cgride
 ```
 
-## Notes
+## What this example shows
 
-This example keeps the source layout compatible with the upcoming Cgride project reader while still being easy to build today with Vix single-file mode.
+This example shows:
+
+- one executable target;
+- one source file;
+- a `cgride.cpp` project description;
+- the normal `cgride build` and `cgride run` workflow.
